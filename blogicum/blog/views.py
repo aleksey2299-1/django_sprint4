@@ -87,10 +87,10 @@ class PostListView(ListView):
                 ).select_related(
                 'category', 'author', 'location'
                 ).filter(
-                    is_published=True,
-                    category__is_published=True,
-                    pub_date__lte=dt.datetime.now(dt.timezone.utc),
-                    )
+                is_published=True,
+                category__is_published=True,
+                pub_date__lte=dt.datetime.now(dt.timezone.utc),
+                )
                 )
 
 
@@ -164,11 +164,11 @@ class CategoryListView(ListView):
                 ).select_related(
                 'category', 'author', 'location'
                 ).filter(
-                    is_published=True,
-                    category__is_published=True,
-                    pub_date__lte=dt.datetime.now(dt.timezone.utc),
-                    category__slug=self.kwargs['category_slug']
-                    )
+                is_published=True,
+                category__is_published=True,
+                pub_date__lte=dt.datetime.now(dt.timezone.utc),
+                category__slug=self.kwargs['category_slug']
+                )
                 )
 
 
