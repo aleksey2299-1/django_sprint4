@@ -90,7 +90,8 @@ class PostListView(ListView):
                     is_published=True,
                     category__is_published=True,
                     pub_date__lte=dt.datetime.now(dt.timezone.utc),
-                ))
+                )
+                )
 
 
 class PostDetailView(DetailView):
@@ -167,18 +168,15 @@ class CategoryListView(ListView):
                     category__is_published=True,
                     pub_date__lte=dt.datetime.now(dt.timezone.utc),
                     category__slug=self.kwargs['category_slug']
-                ))
+                )
+                )
 
 
 def profile(request, slug):
     profile = get_object_or_404(User, username=slug)
-    posts = Post.objects.annotate(
-                comment_count=Count('comments')
-            ).select_related(
-                'category', 'author', 'location'
-            ).filter(
-                author=profile
-            ).order_by('-pub_date')
+    posts = Post.objects.annotate(comment_count=Count(
+        'comments')).select_related('category', 'author', 'location').filter(
+        author=profile).order_by('-pub_date')
     paginator = Paginator(posts, constants.POSTS_PER_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
