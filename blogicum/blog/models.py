@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
 
 User = get_user_model()
 
@@ -27,7 +28,7 @@ class Category(IsPublishedModel):
         'Идентификатор',
         unique=True,
         help_text='Идентификатор страницы для URL;'
-        ' разрешены символы латиницы, цифры, дефис и подчёркивание.',
+                  ' разрешены символы латиницы, цифры, дефис и подчёркивание.',
     )
 
     class Meta:
@@ -52,18 +53,20 @@ class Post(IsPublishedModel):
     pub_date = models.DateTimeField(
         'Дата и время публикации',
         help_text='Если установить дату и время в будущем —'
-        ' можно делать отложенные публикации.',
+                  ' можно делать отложенные публикации.',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор публикации'
+        verbose_name='Автор публикации',
+        related_name='post'
     )
     location = models.ForeignKey(
         Location,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='Местоположение'
+        verbose_name='Местоположение',
+        related_name='post',
     )
     category = models.ForeignKey(
         Category,
@@ -72,7 +75,11 @@ class Post(IsPublishedModel):
         related_name='post',
         verbose_name='Категория'
     )
-    image = models.ImageField('Фото', upload_to='posts_images', blank=True)
+    image = models.ImageField(
+        'Фото',
+        upload_to=settings.POST_IMAGE_DIR,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'публикация'
@@ -80,7 +87,7 @@ class Post(IsPublishedModel):
         ordering = ('-pub_date', )
 
     def get_absolute_url(self):
-        return reverse("blog:post_detail", kwargs={"pk": self.pk})
+        return reverse("blog:post_detail", args=[self.pk])
 
 
 class Comment(models.Model):
@@ -91,10 +98,15 @@ class Comment(models.Model):
         related_name='comments',
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='comments'
+    )
 
     class Meta:
         ordering = ('created_at',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def get_absolute_url(self):
-        return reverse("blog:post_detail", kwargs={"pk": self.pk})
+        return reverse("blog:post_detail", args=[self.pk])
